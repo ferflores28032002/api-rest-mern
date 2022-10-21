@@ -14,8 +14,11 @@ export const productsControllers = async (req, res) => {
   try {
     const products = await modelProducts.findAll();
 
+    if (products.length === 0) {
+      res.json("¡No hay Registros en la tabla!");
+    }
+
     res.json({
-      res: "Productos mostrados exitosamente",
       products,
     });
   } catch (error) {
@@ -31,7 +34,6 @@ export const addProductsControllers = async (req, res) => {
   try {
     if (req.files?.image) {
       const results = await uploadImage(req.files.image.tempFilePath);
-
       const { public_id, secure_url } = results;
 
       const addProducts = await modelProducts.create({
@@ -41,7 +43,6 @@ export const addProductsControllers = async (req, res) => {
         image_id: public_id,
         image_url: secure_url,
       });
-
       await fs.unlink(req.files.image.tempFilePath);
     }
 
@@ -84,37 +85,37 @@ export const deleteProductsControllers = async (req, res) => {
 // Modificar un producto por id
 
 export const updateProductControllers = async (req, res) => {
-
-  // Parametros
   const { id } = req.params;
   const { name, description, price } = req.body;
 
   try {
+    const product = await modelProducts.findOne({
+      where: {
+        id,
+      },
+    });
 
-    const updateProducts = await modelProducts.findOne({ where: { id } });
+    product.set({
+      name,
+      description,
+      price,
+    });
 
     if (req.files?.image) {
+      await deleteImage(product.image_id);
 
       const results = await uploadImage(req.files.image.tempFilePath);
       const { public_id, secure_url } = results;
-      await deleteImage(updateProducts.image_id);
 
-      updateProducts.set({
-        name,
-        description,
-        price,
+      product.set({
         image_id: public_id,
         image_url: secure_url,
       });
-
       await fs.unlink(req.files.image.tempFilePath);
-
     }
-    await updateProducts.save();
+    await product.save();
 
-    res.json({
-      res: "¡Producto actualizado exitosamente!",
-    });
+    res.json("actualizado");
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

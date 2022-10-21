@@ -10,10 +10,11 @@ import {
 
 // Configuracion de express-fileupload para cargar imagenes
 import fileUpload from "express-fileupload";
-
 const router = express.Router();
 
 router.get("/product/", productsControllers);
+
+
 router.post(
   "/product/",
   fileUpload({
@@ -22,7 +23,11 @@ router.post(
   }),
   addProductsControllers
 );
+
+
 router.delete("/product/:id", deleteProductsControllers);
+
+
 router.put(
   "/product/:id",
   fileUpload({
