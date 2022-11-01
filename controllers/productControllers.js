@@ -1,7 +1,3 @@
-// Controladores de cada tabla de la base de datos mysql
-// Unimos el controlador con el modelo de la tabla
-// Ejemplo: modelProducts --> productsControllers
-
 import { modelProducts } from "../models/product.js";
 import { deleteImage, uploadImage } from "../utils/cloudinary.js";
 
@@ -39,7 +35,7 @@ export const productsControllers = async (req, res) => {
     res.json({
       total_register: count,
       page,
-      products: productos,
+      data: productos,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -71,7 +67,7 @@ export const addProductsControllers = async (req, res) => {
     }
 
     res.json({
-      res: "¡Producto añadido correctamente!",
+      msg: "¡Producto añadido correctamente!",
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -99,7 +95,7 @@ export const deleteProductsControllers = async (req, res) => {
     });
 
     res.json({
-      res: "¡Producto con el id " + id + " Eliminado correctamente!",
+      msg: "¡Producto Eliminado correctamente!",
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -143,8 +139,71 @@ export const updateProductControllers = async (req, res) => {
     }
     await product.save();
 
-    res.json("actualizado");
+    res.json({
+      msg: "¡Producto Actualizado correctamente!",
+    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
+
+// Buscar un producto por id
+
+export const searchProductId = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const product = await modelProducts.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!product) {
+      return res.json({
+        msg: "¡El producto no existe!",
+      });
+    }
+    res.json({
+      msg: "¡Producto encontrado!",
+      data: product,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// buscar productos por categoriad
+
+export const searchProductCategories = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const product = await modelProducts.findAll({
+      where: {
+        idCategories: id,
+      },
+    });
+
+
+    console.log(product)
+
+    if (product.length===0) {
+      return res.json({
+        msg: "¡El producto con esa categoria no existe!",
+      });
+    }
+    res.json({
+      msg: "¡Productos encontrado!",
+      data: product,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+

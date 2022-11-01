@@ -1,9 +1,9 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/conexion.js";
-import { userModel } from "./user.js";
+import { empleadosModel } from "./empleados.js";
 
-export const rolesModel = sequelize.define(
-  "roles",
+export const cargosModel = sequelize.define(
+  "cargos",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -19,13 +19,13 @@ export const rolesModel = sequelize.define(
   }
 );
 
-// Los roles que pueden tener los usuarios del sistema
-rolesModel.hasMany(userModel, {
-  foreignKey: "idRol",
+// Los cargos los tienen los empleados
+cargosModel.hasMany(empleadosModel, {
+  foreignKey: "idCargo",
   sourceKey: "id",
 });
 
-userModel.belongsTo(rolesModel, {
-  foreignKey: "idRol",
+empleadosModel.belongsTo(cargosModel, {
+  foreignKey: "idCargo",
   targetId: "id",
 });

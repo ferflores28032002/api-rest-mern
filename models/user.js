@@ -10,10 +10,19 @@ export const userModel = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    name: {
+      type: DataTypes.STRING,
+    },
     email: {
       type: DataTypes.STRING,
     },
     password: {
+      type: DataTypes.STRING,
+    },
+    image_id: {
+      type: DataTypes.STRING,
+    },
+    image_url: {
       type: DataTypes.STRING,
     },
   },
@@ -22,12 +31,13 @@ export const userModel = sequelize.define(
   }
 );
 
+// foreing key del usuario que crea productos
 
 userModel.hasMany(modelProducts, {
   foreignKey: "idUserCreateProduct",
-  sourceKey: "id"
-})
+  sourceKey: "id",
+});
 modelProducts.belongsTo(userModel, {
   foreignKey: "idUserCreateProduct",
-  targetKey: "id"
-})
+  targetKey: "id",
+});

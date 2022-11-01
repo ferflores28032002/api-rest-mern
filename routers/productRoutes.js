@@ -5,6 +5,8 @@ import {
   addProductsControllers,
   deleteProductsControllers,
   productsControllers,
+  searchProductCategories,
+  searchProductId,
   updateProductControllers,
 } from "../controllers/productControllers.js";
 
@@ -13,7 +15,6 @@ import fileUpload from "express-fileupload";
 const router = express.Router();
 
 router.get("/product/", productsControllers);
-
 
 router.post(
   "/product/",
@@ -24,9 +25,7 @@ router.post(
   addProductsControllers
 );
 
-
 router.delete("/product/:id", deleteProductsControllers);
-
 
 router.put(
   "/product/:id",
@@ -37,5 +36,7 @@ router.put(
   updateProductControllers
 );
 
+router.get("/product/:id", searchProductId);
+router.get("/product/:id/categories", searchProductCategories);
 
 export default router;

@@ -2,10 +2,13 @@ import express from "express";
 import { DATABASE, PORT } from "./env/config.js";
 import cors from "cors";
 import { sequelize } from "./database/conexion.js";
+
 import router from "./routers/productRoutes.js";
 import routerUsers from "./routers/usersRoutes.js";
 import routerCategories from "./routers/categoriesRoutes.js";
 import routerRoles from "./routers/rolesRoutes.js";
+import routerCargo from "./routers/cargosRoutes.js";
+import routerEmpleados from "./routers/empleadosRoutes.js";
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -17,6 +20,9 @@ app.use(router);
 app.use(routerUsers);
 app.use(routerCategories);
 app.use(routerRoles);
+app.use(routerCargo);
+app.use(routerEmpleados);
+
 // verificamos que la conexion sea exitosa ala base de datos mysql
 
 async function main() {

@@ -3,12 +3,20 @@
 import { rolesModel } from "../models/roles.js";
 
 export const getRoles = async (req, res) => {
+  const page = Number(req.query.page) || 0;
+  let size = 10;
+
+  let options = {
+    limit: +size,
+    offset: +page * +size,
+  };
   try {
-    const { count, rows } = await rolesModel.findAndCountAll();
+    const { count, rows } = await rolesModel.findAndCountAll(options);
 
     res.json({
       cantidad_roles: count,
-      roles: rows,
+      page,
+      data: rows,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -21,12 +29,23 @@ export const addRoles = async (req, res) => {
   const { name } = req.body;
 
   try {
+    // Buscamos el rol para ver si ya existe en el sistema
+    const buscar_rol = await rolesModel.findOne({
+      where: {
+        name,
+      },
+    });
+    if (buscar_rol) {
+      return res.json({
+        msg: "¡El rol ya existe!",
+      });
+    }
     const roles = await rolesModel.create({
       name,
     });
 
     res.json({
-      res: "¡Rol creado correctamente!",
+      msg: "¡Rol creado correctamente!",
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -46,7 +65,7 @@ export const deleteRoles = async (req, res) => {
     });
 
     res.json({
-      res: "¡Rol eliminado correctamente!",
+      msg: "¡Rol eliminado correctamente!",
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -73,7 +92,7 @@ export const updateRoles = async (req, res) => {
     update.save();
 
     res.json({
-      res: "¡Rol actualizado correctamente!",
+      msg: "¡Rol actualizado correctamente!",
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });

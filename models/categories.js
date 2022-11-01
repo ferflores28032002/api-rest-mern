@@ -19,6 +19,7 @@ export const categoriesModel = sequelize.define(
   }
 );
 
+// Las categorias las tienen los productos del inventario
 categoriesModel.hasMany(modelProducts, {
   foreignKey: "idCategories",
   sourceKey: "id",

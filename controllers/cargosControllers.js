@@ -1,8 +1,8 @@
-// Controlador para las categorias de los productos
+// Controlador para los cargos de los empleados del sistema
 
-import { categoriesModel } from "../models/categories.js";
+import { cargosModel } from "../models/cargos.js";
 
-export const getCategories = async (req, res) => {
+export const getCargos = async (req, res) => {
   const page = Number(req.query.page) || 0;
   let size = 10;
 
@@ -10,11 +10,12 @@ export const getCategories = async (req, res) => {
     limit: +size,
     offset: +page * +size,
   };
+
   try {
-    const { count, rows } = await categoriesModel.findAndCountAll(options);
+    const { count, rows } = await cargosModel.findAndCountAll(options);
 
     res.json({
-      cantidad_categories: count,
+      cantidad_cargos: count,
       page,
       data: rows,
     });
@@ -23,64 +24,65 @@ export const getCategories = async (req, res) => {
   }
 };
 
-// crear nuevas categorias
+// crear nuevas cargos
 
-export const addCategories = async (req, res) => {
+export const addCargo = async (req, res) => {
   const { name } = req.body;
 
   try {
-    // Buscamos la categoria aver si existe
-    const buscar_cate = await categoriesModel.findOne({
+    // Buscamos el cargo para ver si ya existe en el sistema
+    const buscar_cargo = await cargosModel.findOne({
       where: {
         name,
       },
     });
 
-    if (buscar_cate) {
+    if (buscar_cargo) {
       return res.json({
-        msg: "¡La categoria ya existe!",
+        msg: "¡El cargo ya existe!",
       });
     }
-    const categoria = await categoriesModel.create({
+
+    const cargo = await cargosModel.create({
       name,
     });
 
     res.json({
-      msg: "¡Categoria creada correctamente!",
+      msg: "¡Cargo creado correctamente!",
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
 
-// Elminar categorias
+// Elminar cargos
 
-export const deleteCategories = async (req, res) => {
+export const deleteCargos = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const cateDelete = await categoriesModel.destroy({
+    const cargo = await cargosModel.destroy({
       where: {
         id,
       },
     });
 
     res.json({
-      msg: "¡Categoria eliminada correctamente!",
+      msg: "¡Cargo eliminado correctamente!",
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
 
-// Modificar categorias de los productos
+// Modificar roles de los productos
 
-export const updateCategories = async (req, res) => {
+export const updateCargos = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
   try {
-    const update = await categoriesModel.findOne({
+    const update = await cargosModel.findOne({
       where: {
         id,
       },
@@ -93,9 +95,10 @@ export const updateCategories = async (req, res) => {
     update.save();
 
     res.json({
-      msg: "¡Categoria actualizada correctamente!",
+      msg: "¡Cargo actualizado correctamente!",
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
+

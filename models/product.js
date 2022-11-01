@@ -3,34 +3,28 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/conexion.js";
 
-export const modelProducts = sequelize.define(
-  "products",
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    name: {
-      type: DataTypes.STRING,
-    },
-    description: {
-      type: DataTypes.STRING,
-    },
-    stock: {
-      type: DataTypes.INTEGER,
-    },
-    price: {
-      type: DataTypes.DOUBLE,
-    },
-    image_id: {
-      type: DataTypes.STRING,
-    },
-    image_url: {
-      type: DataTypes.STRING,
-    },
+export const modelProducts = sequelize.define("products", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  {
-    timestamps: false,
-  }
-);
+  name: {
+    type: DataTypes.STRING,
+  },
+  description: {
+    type: DataTypes.STRING,
+  },
+  stock: {
+    type: DataTypes.INTEGER,
+  },
+  price: {
+    type: DataTypes.DOUBLE,
+  },
+  image_id: {
+    type: DataTypes.STRING,
+  },
+  image_url: {
+    type: DataTypes.STRING,
+  },
+});
