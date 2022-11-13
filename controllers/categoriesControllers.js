@@ -3,19 +3,18 @@
 import { categoriesModel } from "../models/categories.js";
 
 export const getCategories = async (req, res) => {
-  const page = Number(req.query.page) || 0;
-  let size = 10;
+  // const page = Number(req.query.page) || 0;
+  // let size = 10;
 
-  let options = {
-    limit: +size,
-    offset: +page * +size,
-  };
+  // let options = {
+  //   limit: +size,
+  //   offset: +page * +size,
+  // };
   try {
-    const { count, rows } = await categoriesModel.findAndCountAll(options);
+    const { count, rows } = await categoriesModel.findAndCountAll();
 
     res.json({
       cantidad_categories: count,
-      page,
       data: rows,
     });
   } catch (error) {

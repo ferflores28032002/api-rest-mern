@@ -9,10 +9,11 @@ import routerCategories from "./routers/categoriesRoutes.js";
 import routerRoles from "./routers/rolesRoutes.js";
 import routerCargo from "./routers/cargosRoutes.js";
 import routerEmpleados from "./routers/empleadosRoutes.js";
+import routerPermisos from "./routers/permisosRoutes.js";
 
 const app = express();
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json({ limit: "50mb"}));
 app.use(cors());
 
 // Usamos las rutas con la union de los modelos y los controladores
@@ -22,6 +23,7 @@ app.use(routerCategories);
 app.use(routerRoles);
 app.use(routerCargo);
 app.use(routerEmpleados);
+app.use(routerPermisos);
 
 // verificamos que la conexion sea exitosa ala base de datos mysql
 

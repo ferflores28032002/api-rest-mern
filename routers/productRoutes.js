@@ -7,6 +7,7 @@ import {
   productsControllers,
   searchProductCategories,
   searchProductId,
+  searchProductNames,
   updateProductControllers,
 } from "../controllers/productControllers.js";
 
@@ -38,5 +39,6 @@ router.put(
 
 router.get("/product/:id", searchProductId);
 router.get("/product/:id/categories", searchProductCategories);
+router.get("/product/:name/names", searchProductNames);
 
 export default router;

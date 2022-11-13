@@ -9,16 +9,16 @@ import { userModel } from "../models/user.js";
 // Mostrar todos los productos
 
 export const productsControllers = async (req, res) => {
-  const page = Number(req.query.page) || 0;
-  let size = 10;
+  // const page = Number(req.query.page) || 0;
+  // let size = 10;
 
-  let options = {
-    limit: +size,
-    offset: +page * +size,
-  };
+  // let options = {
+  //   limit: +size,
+  //   offset: +page * +size,
+  // };
 
   try {
-    const { count } = await modelProducts.findAndCountAll(options);
+    const { count } = await modelProducts.findAndCountAll();
     const productos = await modelProducts.findAll({
       include: [
         {
@@ -27,14 +27,13 @@ export const productsControllers = async (req, res) => {
         },
         {
           model: userModel,
-          attributes: ["email"],
+          attributes: ["email", "name", "image_url"],
         },
       ],
     });
 
     res.json({
       total_register: count,
-      page,
       data: productos,
     });
   } catch (error) {
@@ -198,6 +197,38 @@ export const searchProductCategories = async (req, res) => {
     res.json({
       msg: "¡Productos encontrado!",
       data: product,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// Buscar productos por names
+
+export const searchProductNames = async (req, res) => {
+  const { name } = req.params;
+
+  try {
+    const product = await modelProducts.findAll({
+      include: {
+        model: categoriesModel
+      }
+    });
+
+    
+  const resultado = product.filter((elemento) => elemento.name.toLowerCase().includes(name.toLocaleLowerCase()));
+
+
+    if (resultado.length===0) {
+      return res.json({
+        msg: "¡No hay productos con ese nombre!",
+      });
+    }
+    res.json({
+      msg: "¡Producto encontrado!",
+      data: resultado,
     });
   } catch (error) {
     return res.status(500).json({

@@ -3,19 +3,18 @@
 import { rolesModel } from "../models/roles.js";
 
 export const getRoles = async (req, res) => {
-  const page = Number(req.query.page) || 0;
-  let size = 10;
+  // const page = Number(req.query.page) || 0;
+  // let size = 10;
 
-  let options = {
-    limit: +size,
-    offset: +page * +size,
-  };
+  // let options = {
+  //   limit: +size,
+  //   offset: +page * +size,
+  // };
   try {
-    const { count, rows } = await rolesModel.findAndCountAll(options);
+    const { count, rows } = await rolesModel.findAndCountAll();
 
     res.json({
       cantidad_roles: count,
-      page,
       data: rows,
     });
   } catch (error) {

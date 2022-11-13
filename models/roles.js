@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/conexion.js";
+import { permisosModel } from "./permisos.js";
 import { userModel } from "./user.js";
 
 export const rolesModel = sequelize.define(
@@ -29,3 +30,15 @@ userModel.belongsTo(rolesModel, {
   foreignKey: "idRol",
   targetId: "id",
 });
+
+// Los permisos que pueden tener los roles de usuario
+rolesModel.hasMany(permisosModel, {
+  foreignKey: "idRol",
+  sourceKey: "id",
+});
+
+permisosModel.belongsTo(rolesModel, {
+  foreignKey: "idRol",
+  targetId: "id",
+});
+

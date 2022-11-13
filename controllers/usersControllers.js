@@ -7,29 +7,34 @@ import { deleteImage, uploadImage } from "../utils/cloudinary.js";
 
 // Modulo para eliminar las imagenes y usar funciones asyncronas
 import fs from "fs-extra";
+import { empleadosModel } from "../models/empleados.js";
 
 // Mostrar todos los usuarios del sistema
 export const getUserControllers = async (req, res) => {
-  const page = Number(req.query.page) || 0;
-  let size = 10;
+  // const page = Number(req.query.page) || 0;
+  // let size = 10;
 
-  let options = {
-    limit: +size,
-    offset: +page * +size,
-  };
+  // let options = {
+  //   limit: +size,
+  //   offset: +page * +size,
+  // };
 
   try {
-    const { count } = await userModel.findAndCountAll(options);
+    const { count } = await userModel.findAndCountAll();
     const usuarios = await userModel.findAll({
-      include: {
-        model: rolesModel,
-        attributes: ["name"],
-      },
+      include: [
+        {
+          model: rolesModel,
+          attributes: ["name"],
+        },
+        {
+          model: empleadosModel,
+        },
+      ],
     });
 
     res.json({
       total_register: count,
-      page,
       data: usuarios,
     });
   } catch (error) {
@@ -39,59 +44,31 @@ export const getUserControllers = async (req, res) => {
 
 // Ingresar usuarios al sistema
 export const addUsersControllers = async (req, res) => {
-  const { email, password, name, idRol, idEmpleado } = req.body;
 
+  const { name, email, password, idRol, idEmpleado, imagen} = req.body
+  
   try {
-    // Buscamos el usuario para saber si ya existe
-
-    const usuarioName = await userModel.findOne({
-      where: {
-        name,
-      },
+  
+    const results = await uploadImage(imagen);
+    const { public_id, secure_url } = results;
+    const passHash = await bcryptjs.hash(password, 8);
+  
+    const user = await userModel.create({
+      email,
+      name,
+      password: passHash,
+      idRol,
+      idEmpleado,
+      image_id: public_id,
+      image_url: secure_url,
     });
-    const usuarioEmail = await userModel.findOne({
-      where: {
-        email,
-      },
-    });
 
-    if (usuarioName) {
-      return res.json({
-        msg: `¡El usuario ${name} ya existe!`,
-      });
-    }
-    if (usuarioEmail) {
-      return res.json({
-        msg: `¡El Email ${email} ya existe!`,
-      });
-    }
-
-    if (!usuarioName && !usuarioEmail) {
-      if (req.files?.image) {
-        const results = await uploadImage(req.files.image.tempFilePath);
-        const { public_id, secure_url } = results;
-        const passHash = await bcryptjs.hash(password, 8);
-
-        const user = await userModel.create({
-          email,
-          name,
-          password: passHash,
-          idRol,
-          idEmpleado,
-          image_id: public_id,
-          image_url: secure_url,
-        });
-        await fs.unlink(req.files.image.tempFilePath);
-      }
-    }
-
-    // Encriptamos la password para mandarla ala BD
-
-    res.json({
+    res.status(200).json({
       msg: "¡Usuario Creado Correctamente!",
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    // return res.status(500).json({ message: error.message });
+    console.log(error)
   }
 };
 
@@ -131,20 +108,14 @@ export const loginUsersControllers = async (req, res) => {
   const { name, password } = req.body;
 
   try {
-    const usuario = await userModel.findOne({ where: { name } });
-
-    //  const usuario = await userModel.findAll({
-    //   where: {
-    //     name
-    //   },
-    //   include: {
-    //     model: rolesModel,
-    //   },
-    //   attributes: ["name"],
-    // });
+    const usuario = await userModel.findOne({
+      where: {
+        name,
+      },
+    });
 
     if (!usuario) {
-      return res.json({
+      return res.status(400).json({
         msg: "¡El usuario no existe!",
       });
     }
@@ -153,7 +124,7 @@ export const loginUsersControllers = async (req, res) => {
     const passwordValida = await bcryptjs.compare(password, usuario.password);
 
     if (!passwordValida) {
-      return res.json({
+      return res.status(400).json({
         msg: "¡La contraseña es Incorrecta!",
       });
     }
@@ -225,7 +196,7 @@ export const updateUsers = async (req, res) => {
 
 export const updatePassword = async (req, res) => {
   const { id } = req.params;
-  const { password } = req.body;
+  const { password, password2 } = req.body;
 
   try {
     const usuario = await userModel.findOne({
@@ -244,12 +215,12 @@ export const updatePassword = async (req, res) => {
     // Hacemos una comparacion ya que esta encriptada en la BD
 
     if (!(await bcryptjs.compare(password, usuario.password))) {
-      return res.json({
+      return res.status(400).json({
         msg: "¡La contraseña es incorrecta!",
-        msg2: "¡No podemos cambiar la contraseña!",
+        msg2: "¡No contraseña no fue modificada!",
       });
     } else {
-      const passHash = await bcryptjs.hash(password, 8);
+      const passHash = await bcryptjs.hash(password2, 8);
       usuario.set({
         password: passHash,
       });
@@ -263,5 +234,56 @@ export const updatePassword = async (req, res) => {
     return res.status(500).json({
       message: error.message,
     });
+  }
+};
+
+// Revalidamos el token de acceso generado con jwt
+
+export const revalidarToken = async (req, res) => {
+  const { name, id, idEmpleado, email } = req;
+
+  // Generamos un nuevo jwt
+
+  const token = await generarJWT(name, email, id, idEmpleado);
+
+  res.json({
+    msg: "¡Nuevo token del usuario autenticado!",
+    name,
+    id,
+    email,
+    token,
+  });
+};
+
+export const searchUserForId = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const usuario = await userModel.findOne({
+      where: {
+        id,
+      },
+      include: [
+        {
+          model: rolesModel,
+          attributes: ["name"],
+        },
+        {
+          model: empleadosModel,
+        },
+      ],
+    });
+
+    if (!usuario) {
+      return res.status(404).json({
+        msg: "¡El usuario no existe!",
+      });
+    }
+
+    res.json({
+      data: usuario,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };

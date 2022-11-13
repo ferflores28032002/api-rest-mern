@@ -4,16 +4,16 @@ import { cargosModel } from "../models/cargos.js";
 import { empleadosModel } from "../models/empleados.js";
 
 export const getEmpleados = async (req, res) => {
-  const page = Number(req.query.page) || 0;
-  let size = 10;
+  // const page = Number(req.query.page) || 0;
+  // let size = 10;
 
-  let options = {
-    limit: +size,
-    offset: +page * +size,
-  };
+  // let options = {
+  //   limit: +size,
+  //   offset: +page * +size,
+  // };
 
   try {
-    const { count } = await empleadosModel.findAndCountAll(options);
+    const count = await empleadosModel.findAll();
     const employes = await empleadosModel.findAll({
       include: {
         model: cargosModel,
@@ -22,7 +22,6 @@ export const getEmpleados = async (req, res) => {
 
     res.json({
       cantidad_empleados: count,
-      page,
       data: employes,
     });
   } catch (error) {
@@ -32,14 +31,14 @@ export const getEmpleados = async (req, res) => {
 
 // Crear nuevo empleado
 export const addEmpleados = async (req, res) => {
-  const { names, surnames, age, telephone, salary, direction, sex, idCargo } =
+  const { name, surnames, age, telephone, salary, direction, sex, idCargo } =
     req.body;
 
   try {
     // Buscamos el cargo para ver si ya existe en el sistema
     const buscar_empleado = await empleadosModel.findOne({
       where: {
-        names,
+        name,
         surnames,
       },
     });
@@ -51,7 +50,7 @@ export const addEmpleados = async (req, res) => {
     }
 
     const empleado = await empleadosModel.create({
-      names,
+      name,
       surnames,
       age,
       telephone,
@@ -93,7 +92,7 @@ export const deleteEmpleado = async (req, res) => {
 
 export const updateEmpleados = async (req, res) => {
   const { id } = req.params;
-  const { names, surnames, age, telephone, salary, direction, sex, idCargo } =
+  const { name, surnames, age, telephone, salary, direction, sex, idCargo } =
     req.body;
 
   try {
@@ -104,7 +103,7 @@ export const updateEmpleados = async (req, res) => {
     });
 
     update.set({
-      names,
+      name,
       surnames,
       age,
       telephone,

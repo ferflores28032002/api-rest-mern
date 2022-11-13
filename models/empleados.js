@@ -8,7 +8,7 @@ export const empleadosModel = sequelize.define("empleados", {
     autoIncrement: true,
     primaryKey: true,
   },
-  names: {
+  name: {
     type: DataTypes.STRING,
   },
   surnames: {
@@ -28,7 +28,7 @@ export const empleadosModel = sequelize.define("empleados", {
   },
   sex: {
     type: DataTypes.STRING,
-  },
+  }
 });
 
 // Hacemos las configuracion para que al crear un usuario se lo asignemos a un empleado
