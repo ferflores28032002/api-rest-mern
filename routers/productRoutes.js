@@ -11,31 +11,15 @@ import {
   updateProductControllers,
 } from "../controllers/productControllers.js";
 
-// Configuracion de express-fileupload para cargar imagenes
-import fileUpload from "express-fileupload";
 const router = express.Router();
 
 router.get("/product/", productsControllers);
 
-router.post(
-  "/product/",
-  fileUpload({
-    useTempFiles: true,
-    tempFileDir: "./imagenes",
-  }),
-  addProductsControllers
-);
+router.post("/product/", addProductsControllers);
 
 router.delete("/product/:id", deleteProductsControllers);
 
-router.put(
-  "/product/:id",
-  fileUpload({
-    useTempFiles: true,
-    tempFileDir: "./imagenes",
-  }),
-  updateProductControllers
-);
+router.put("/product/:id",updateProductControllers);
 
 router.get("/product/:id", searchProductId);
 router.get("/product/:id/categories", searchProductCategories);

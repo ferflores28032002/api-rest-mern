@@ -3,13 +3,7 @@
 import { rolesModel } from "../models/roles.js";
 
 export const getRoles = async (req, res) => {
-  // const page = Number(req.query.page) || 0;
-  // let size = 10;
 
-  // let options = {
-  //   limit: +size,
-  //   offset: +page * +size,
-  // };
   try {
     const { count, rows } = await rolesModel.findAndCountAll();
 
@@ -25,7 +19,7 @@ export const getRoles = async (req, res) => {
 // crear nuevas roles
 
 export const addRoles = async (req, res) => {
-  const { name } = req.body;
+  const { name, description } = req.body;
 
   try {
     // Buscamos el rol para ver si ya existe en el sistema
@@ -35,12 +29,13 @@ export const addRoles = async (req, res) => {
       },
     });
     if (buscar_rol) {
-      return res.json({
+      return res.status(500).json({
         msg: "¡El rol ya existe!",
       });
     }
     const roles = await rolesModel.create({
       name,
+      description
     });
 
     res.json({
@@ -75,9 +70,22 @@ export const deleteRoles = async (req, res) => {
 
 export const updateRoles = async (req, res) => {
   const { id } = req.params;
-  const { name } = req.body;
+  const { name, description } = req.body;
 
   try {
+
+    // Buscamos el rol para ver si ya existe en el sistema
+    const buscar_rol = await rolesModel.findOne({
+      where: {
+        name,
+      },
+    });
+    if (buscar_rol) {
+      return res.status(500).json({
+        msg: "¡El rol ya existe!",
+      });
+    }
+    
     const update = await rolesModel.findOne({
       where: {
         id,
@@ -86,6 +94,7 @@ export const updateRoles = async (req, res) => {
 
     update.set({
       name,
+      description
     });
 
     update.save();
@@ -97,3 +106,33 @@ export const updateRoles = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+
+export const oneRol = async (req, res) => {
+
+  const { id } = req.params
+
+  try {
+    
+    const rol = await rolesModel.findOne({
+      where: {
+        id
+      }
+    })
+
+
+    if(!rol){
+      res.json({
+        msg: "El rol no existe"
+      })
+    }
+
+    res.json({
+      data: rol
+    })
+
+  } catch (error) {
+    console.log(error)
+  }
+
+}

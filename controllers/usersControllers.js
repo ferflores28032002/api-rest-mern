@@ -5,8 +5,6 @@ import { generarJWT } from "../helpers/jwt.js";
 
 import { deleteImage, uploadImage } from "../utils/cloudinary.js";
 
-// Modulo para eliminar las imagenes y usar funciones asyncronas
-import fs from "fs-extra";
 import { empleadosModel } from "../models/empleados.js";
 
 // Mostrar todos los usuarios del sistema
@@ -48,6 +46,20 @@ export const addUsersControllers = async (req, res) => {
   const { name, email, password, idRol, idEmpleado, imagen} = req.body
   
   try {
+
+      // Buscamos el usuario aver si existe
+      const buscar_user = await userModel.findOne({
+        where: {
+          name,
+        },
+      });
+  
+      if (buscar_user) {
+        return res.status(500).json({
+          msg: "¡El usuario ya existe!",
+        });
+      }
+
   
     const results = await uploadImage(imagen);
     const { public_id, secure_url } = results;
@@ -153,9 +165,24 @@ export const loginUsersControllers = async (req, res) => {
 
 export const updateUsers = async (req, res) => {
   const { id } = req.params;
-  const { name, email, password, idRol, idEmpleado } = req.body;
+  const { name, email, password, idRol, idEmpleado, image } = req.body;
 
   try {
+
+      // Buscamos el usuario aver si existe
+      // const buscar_user = await userModel.findOne({
+      //   where: {
+      //     name,
+      //   },
+      // });
+  
+      // if (buscar_user) {
+      //   return res.status(500).json({
+      //     msg: "¡El usuario ya existe!",
+      //   });
+      // }
+
+
     const usuario = await userModel.findOne({
       where: {
         id,
@@ -168,18 +195,25 @@ export const updateUsers = async (req, res) => {
       idRol,
       idEmpleado,
     });
+    
+    
+    if(password != ""){
+      const passHash = await bcryptjs.hash(password, 8);
+      usuario.set({
+        password: passHash,
+      });
+    }
 
-    if (req.files?.image) {
+    if (image) {
       await deleteImage(usuario.image_id);
 
-      const results = await uploadImage(req.files.image.tempFilePath);
+      const results = await uploadImage(image);
       const { public_id, secure_url } = results;
 
       usuario.set({
         image_id: public_id,
         image_url: secure_url,
       });
-      await fs.unlink(req.files.image.tempFilePath);
     }
 
     await usuario.save();

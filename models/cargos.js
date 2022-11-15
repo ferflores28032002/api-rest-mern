@@ -13,6 +13,9 @@ export const cargosModel = sequelize.define(
     name: {
       type: DataTypes.STRING,
     },
+    description: {
+      type: DataTypes.STRING,
+    },
   },
   {
     timestamps: false,

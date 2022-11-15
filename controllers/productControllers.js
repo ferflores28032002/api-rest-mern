@@ -7,15 +7,7 @@ import { categoriesModel } from "../models/categories.js";
 import { userModel } from "../models/user.js";
 
 // Mostrar todos los productos
-
 export const productsControllers = async (req, res) => {
-  // const page = Number(req.query.page) || 0;
-  // let size = 10;
-
-  // let options = {
-  //   limit: +size,
-  //   offset: +page * +size,
-  // };
 
   try {
     const { count } = await modelProducts.findAndCountAll();
@@ -44,12 +36,12 @@ export const productsControllers = async (req, res) => {
 // Agregar nuevos productos ala tabla products
 
 export const addProductsControllers = async (req, res) => {
-  const { name, description, price, idCategories, idUserCreateProduct, stock } =
+  const { name, description, price, idCategories, idUserCreateProduct, idProveedor, stock, image } =
     req.body;
 
   try {
-    if (req.files?.image) {
-      const results = await uploadImage(req.files.image.tempFilePath);
+
+      const results = await uploadImage(image);
       const { public_id, secure_url } = results;
 
       const addProducts = await modelProducts.create({
@@ -61,11 +53,11 @@ export const addProductsControllers = async (req, res) => {
         image_url: secure_url,
         idCategories,
         idUserCreateProduct,
+        idProveedor
       });
-      await fs.unlink(req.files.image.tempFilePath);
-    }
 
-    res.json({
+
+    res.status(200).json({
       msg: "¡Producto añadido correctamente!",
     });
   } catch (error) {
@@ -105,7 +97,7 @@ export const deleteProductsControllers = async (req, res) => {
 
 export const updateProductControllers = async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, stock, idCategories, idUserCreateProduct } =
+  const { name, description, price, stock, idCategories, idUserCreateProduct, idProveedor, image } =
     req.body;
 
   try {
@@ -122,19 +114,19 @@ export const updateProductControllers = async (req, res) => {
       price,
       idCategories,
       idUserCreateProduct,
+      idProveedor
     });
 
-    if (req.files?.image) {
+    if (image) {
       await deleteImage(product.image_id);
 
-      const results = await uploadImage(req.files.image.tempFilePath);
+      const results = await uploadImage(image);
       const { public_id, secure_url } = results;
 
       product.set({
         image_id: public_id,
         image_url: secure_url,
       });
-      await fs.unlink(req.files.image.tempFilePath);
     }
     await product.save();
 

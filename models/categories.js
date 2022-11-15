@@ -13,6 +13,9 @@ export const categoriesModel = sequelize.define(
     name: {
       type: DataTypes.STRING,
     },
+    description: {
+      type: DataTypes.STRING,
+    },
   },
   {
     timestamps: false,

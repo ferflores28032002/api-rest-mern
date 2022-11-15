@@ -3,13 +3,6 @@
 import { categoriesModel } from "../models/categories.js";
 
 export const getCategories = async (req, res) => {
-  // const page = Number(req.query.page) || 0;
-  // let size = 10;
-
-  // let options = {
-  //   limit: +size,
-  //   offset: +page * +size,
-  // };
   try {
     const { count, rows } = await categoriesModel.findAndCountAll();
 
@@ -25,7 +18,7 @@ export const getCategories = async (req, res) => {
 // crear nuevas categorias
 
 export const addCategories = async (req, res) => {
-  const { name } = req.body;
+  const { name, description } = req.body;
 
   try {
     // Buscamos la categoria aver si existe
@@ -36,12 +29,13 @@ export const addCategories = async (req, res) => {
     });
 
     if (buscar_cate) {
-      return res.json({
+      return res.status(500).json({
         msg: "¡La categoria ya existe!",
       });
     }
     const categoria = await categoriesModel.create({
       name,
+      description,
     });
 
     res.json({
@@ -76,9 +70,21 @@ export const deleteCategories = async (req, res) => {
 
 export const updateCategories = async (req, res) => {
   const { id } = req.params;
-  const { name } = req.body;
+  const { name, description } = req.body;
 
   try {
+    // Buscamos la categoria aver si existe
+    const buscar_cate = await categoriesModel.findOne({
+      where: {
+        name,
+      },
+    });
+
+    if (buscar_cate) {
+      return res.status(500).json({
+        msg: "¡La categoria ya existe!",
+      });
+    }
     const update = await categoriesModel.findOne({
       where: {
         id,
@@ -87,6 +93,7 @@ export const updateCategories = async (req, res) => {
 
     update.set({
       name,
+      description,
     });
 
     update.save();
@@ -96,5 +103,29 @@ export const updateCategories = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
+  }
+};
+
+export const onecategoria = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const categoria = await categoriesModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!categoria) {
+      res.json({
+        msg: "la categoria no existe",
+      });
+    }
+
+    res.json({
+      data: categoria,
+    });
+  } catch (error) {
+    console.log(error);
   }
 };

@@ -12,7 +12,7 @@ const routerEmpleados = Router();
 routerEmpleados.get("/empleados", getEmpleados);
 routerEmpleados.post("/empleados", addEmpleados);
 routerEmpleados.delete("/empleados/:id", deleteEmpleado);
-routerEmpleados.put("/empleados/:id", updateEmpleados);
-routerEmpleados.get("/search/empleados/:id", searchEmpleado);
+routerEmpleados.put("/empleado/:id", updateEmpleados);
+routerEmpleados.get("/empleado/:id", searchEmpleado);
 
 export default routerEmpleados;

@@ -143,7 +143,7 @@ export const searchEmpleado = async (req, res) => {
 
     res.json({
       msg: "¡Empleado encontrado!",
-      empleado,
+      data: empleado,
     });
   } catch (error) {
     return res.status(500).json({
