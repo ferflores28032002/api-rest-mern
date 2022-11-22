@@ -5,6 +5,7 @@ import { deleteImage, uploadImage } from "../utils/cloudinary.js";
 import fs from "fs-extra";
 import { categoriesModel } from "../models/categories.js";
 import { userModel } from "../models/user.js";
+import { rolesModel } from "../models/roles.js";
 
 // Mostrar todos los productos
 export const productsControllers = async (req, res) => {
@@ -36,7 +37,7 @@ export const productsControllers = async (req, res) => {
 // Agregar nuevos productos ala tabla products
 
 export const addProductsControllers = async (req, res) => {
-  const { name, description, price, idCategories, idUserCreateProduct, idProveedor, stock, image } =
+  const { name, description, price, idCategories, idUserCreateProduct, stock, image } =
     req.body;
 
   try {
@@ -53,7 +54,6 @@ export const addProductsControllers = async (req, res) => {
         image_url: secure_url,
         idCategories,
         idUserCreateProduct,
-        idProveedor
       });
 
 
@@ -97,7 +97,7 @@ export const deleteProductsControllers = async (req, res) => {
 
 export const updateProductControllers = async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, stock, idCategories, idUserCreateProduct, idProveedor, image } =
+  const { name, description, price, stock, idCategories, idUserCreateProduct, image } =
     req.body;
 
   try {
@@ -114,7 +114,6 @@ export const updateProductControllers = async (req, res) => {
       price,
       idCategories,
       idUserCreateProduct,
-      idProveedor
     });
 
     if (image) {
@@ -148,6 +147,14 @@ export const searchProductId = async (req, res) => {
       where: {
         id,
       },
+      include: [
+        {
+          model: userModel,
+          
+        },{
+          model: categoriesModel
+        }
+      ]
     });
 
     if (!product) {
@@ -155,10 +162,12 @@ export const searchProductId = async (req, res) => {
         msg: "¡El producto no existe!",
       });
     }
+
     res.json({
       msg: "¡Producto encontrado!",
       data: product,
     });
+    
   } catch (error) {
     return res.status(500).json({
       message: error.message,

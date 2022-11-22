@@ -2,10 +2,12 @@ import { rolesModel } from "../models/roles.js";
 import { userModel } from "../models/user.js";
 import bcryptjs from "bcryptjs";
 import { generarJWT } from "../helpers/jwt.js";
+import nodemailer from "nodemailer";
 
 import { deleteImage, uploadImage } from "../utils/cloudinary.js";
 
 import { empleadosModel } from "../models/empleados.js";
+import { nodemailer_api_key, usuario_correo } from "../env/config.js";
 
 // Mostrar todos los usuarios del sistema
 export const getUserControllers = async (req, res) => {
@@ -42,29 +44,26 @@ export const getUserControllers = async (req, res) => {
 
 // Ingresar usuarios al sistema
 export const addUsersControllers = async (req, res) => {
+  const { name, email, password, idRol, idEmpleado, imagen } = req.body;
 
-  const { name, email, password, idRol, idEmpleado, imagen} = req.body
-  
   try {
+    // Buscamos el usuario aver si existe
+    const buscar_user = await userModel.findOne({
+      where: {
+        name,
+      },
+    });
 
-      // Buscamos el usuario aver si existe
-      const buscar_user = await userModel.findOne({
-        where: {
-          name,
-        },
+    if (buscar_user) {
+      return res.status(500).json({
+        msg: "¡El usuario ya existe!",
       });
-  
-      if (buscar_user) {
-        return res.status(500).json({
-          msg: "¡El usuario ya existe!",
-        });
-      }
+    }
 
-  
     const results = await uploadImage(imagen);
     const { public_id, secure_url } = results;
     const passHash = await bcryptjs.hash(password, 8);
-  
+
     const user = await userModel.create({
       email,
       name,
@@ -80,7 +79,7 @@ export const addUsersControllers = async (req, res) => {
     });
   } catch (error) {
     // return res.status(500).json({ message: error.message });
-    console.log(error)
+    console.log(error);
   }
 };
 
@@ -165,23 +164,21 @@ export const loginUsersControllers = async (req, res) => {
 
 export const updateUsers = async (req, res) => {
   const { id } = req.params;
-  const { name, email, password, idRol, idEmpleado, image } = req.body;
+  const { name, email, idRol, idEmpleado, image } = req.body;
 
   try {
+    // Buscamos el usuario aver si existe
+    // const buscar_user = await userModel.findOne({
+    //   where: {
+    //     name,
+    //   },
+    // });
 
-      // Buscamos el usuario aver si existe
-      // const buscar_user = await userModel.findOne({
-      //   where: {
-      //     name,
-      //   },
-      // });
-  
-      // if (buscar_user) {
-      //   return res.status(500).json({
-      //     msg: "¡El usuario ya existe!",
-      //   });
-      // }
-
+    // if (buscar_user) {
+    //   return res.status(500).json({
+    //     msg: "¡El usuario ya existe!",
+    //   });
+    // }
 
     const usuario = await userModel.findOne({
       where: {
@@ -195,14 +192,6 @@ export const updateUsers = async (req, res) => {
       idRol,
       idEmpleado,
     });
-    
-    
-    if(password != ""){
-      const passHash = await bcryptjs.hash(password, 8);
-      usuario.set({
-        password: passHash,
-      });
-    }
 
     if (image) {
       await deleteImage(usuario.image_id);
@@ -319,5 +308,93 @@ export const searchUserForId = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
+  }
+};
+
+export const emailPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const userEmail = await userModel.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (!userEmail) {
+      return res.status(401).json({
+        msg: "No hay usuarios con ese email",
+      });
+    }
+
+    // Contenido del gmail
+    const msg = {
+      to: userEmail.email,
+      from: "fernandojose28032002@gmail.com",
+      subject: "Reestablece tu contraseña",
+      text: `Hola ${userEmail.name}, ingresa en este link y cambia tu contraseña!  -->  http://localhost:3000/user/password/${userEmail.id}`,
+    };
+
+    // Si el usuario es verdadero le enviamos un correo para que cambie la contraseña
+
+    var transporter = nodemailer.createTransport({
+      service: "gmail", // hostname
+      secure: false, // use SSL
+      port: 25, // port for secure SMTP
+      auth: {
+        user: usuario_correo,
+        pass: nodemailer_api_key,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    let info = transporter.sendMail(msg,
+      (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          return res.json({
+            msg: "¡Se le a enviado en email para que restablezca la contraseña!",
+          });
+        }
+      }
+    );
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+
+
+export const restablecerPassword = async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  try {
+    const usuario = await userModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+
+    const passHash = await bcryptjs.hash(password, 8);
+    usuario.set({
+      password: passHash,
+    })
+    
+    await usuario.save();
+
+    res.json({
+      msg: "¡Se ha Restablecido correctamente la contraseña!",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 };

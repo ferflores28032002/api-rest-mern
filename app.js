@@ -11,6 +11,7 @@ import routerCargo from "./routers/cargosRoutes.js";
 import routerEmpleados from "./routers/empleadosRoutes.js";
 import routerPermisos from "./routers/permisosRoutes.js";
 import routerProveedores from "./routers/proveedoresRoutes.js";
+import routerVentas from "./routers/ventasRoutes.js";
 
 const app = express();
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -26,6 +27,7 @@ app.use(routerCargo);
 app.use(routerEmpleados);
 app.use(routerPermisos);
 app.use(routerProveedores);
+app.use(routerVentas);
 
 // verificamos que la conexion sea exitosa ala base de datos mysql
 

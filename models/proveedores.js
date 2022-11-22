@@ -19,13 +19,13 @@ export const proveedoresModel = sequelize.define(
   }
 );
 
-// Las categorias las tienen los productos del inventario
-proveedoresModel.hasMany(modelProducts, {
-  foreignKey: "idProveedor",
-  sourceKey: "id",
-});
+// // Las categorias las tienen los productos del inventario
+// proveedoresModel.hasMany(modelProducts, {
+//   foreignKey: "idProveedor",
+//   sourceKey: "id",
+// });
 
-modelProducts.belongsTo(proveedoresModel, {
-  foreignKey: "idProveedor",
-  targetKey: "id",
-});
+// modelProducts.belongsTo(proveedoresModel, {
+//   foreignKey: "idProveedor",
+//   targetKey: "id",
+// });

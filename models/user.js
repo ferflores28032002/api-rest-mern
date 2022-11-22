@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/conexion.js";
 import { modelProducts } from "./product.js";
+import { ventasModel } from "./ventas.js";
 
 export const userModel = sequelize.define(
   "users",
@@ -39,5 +40,15 @@ userModel.hasMany(modelProducts, {
 });
 modelProducts.belongsTo(userModel, {
   foreignKey: "idUserCreateProduct",
+  targetKey: "id",
+});
+
+
+userModel.hasMany(ventasModel, {
+  foreignKey: "idUserCreateVenta",
+  sourceKey: "id",
+});
+ventasModel.belongsTo(userModel, {
+  foreignKey: "idUserCreateVenta",
   targetKey: "id",
 });
